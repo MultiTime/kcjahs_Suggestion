@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김천중앙고등학교 건의함</title>
+    <!-- 1) Firebase SDK 로드 (반드시 가장 위) -->
+<script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 사이드바 스타일 */
+        .sidebar {
+            width: 300px;
+            background-color: #e8f0fe;
+            border-right: 2px solid #d1e3ff;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background-color: #6c9eff;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .school-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 로그인 섹션 */
+        .login-section {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #d1e3ff;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #6c9eff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .login-btn:hover {
+            background-color: #5a8ae8;
+        }
+
+        /* 사용자 정보 섹션 */
+        .user-info {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .user-info.active {
+            display: block;
+        }
+
+        .user-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .user-class {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 건의 목록 섹션 */
+        .suggestion-lists {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .list-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8f0fe;
+        }
+
+        .suggestion-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #f8faff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .suggestion-item:hover {
+            background-color: #e8f0fe;
+        }
+
+        .suggestion-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .suggestion-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        /* 메인 콘텐츠 영역 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* 건의 작성 영역 */
+        .suggestion-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .input-section {
+            background-color: #f8faff;
+            border: 2px solid #e8f0fe;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .category-select {
+            width: 200px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #d1e3ff;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .title-input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #d1e3ff;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .content-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 1px solid #d1e3ff;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .submit-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .anonymous-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .submit-btn {
+            padding: 12px 30px;
+            background-color: #6c9eff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #5a8ae8;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 300px;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 사이드바 -->
+        <div class="sidebar">
+            <!-- 로고 섹션 -->
+            <div class="logo-section">
+                <div class="logo">김중</div>
+                <div class="school-name">김천중앙고등학교</div>
+            </div>
+
+            <!-- 로그인 섹션 -->
+            <div class="login-section" id="loginSection">
+              <div class="login-form">
+                <input type="text" id="studentId" placeholder="학번" />
+                <input type="password" id="password" placeholder="비밀번호" />
+                <button class="login-btn" onclick="handleLogin()">로그인</button>
+                <button class="login-btn" onclick="handleSignUp()">회원가입</button>  <!-- 추가 -->
+              </div>
+            </div>
+
+            <!-- 사용자 정보 섹션 -->
+            <div class="user-info" id="userInfo">
+                <div class="user-name" id="userName">홍길동</div>
+                <div class="user-class" id="userClass">2학년 3반</div>
+                <button class="login-btn" onclick="handleLogout()" style="margin-top: 10px;">로그아웃</button>
+            </div>
+
+            <!-- 건의 목록 섹션 -->
+            <div class="suggestion-lists">
+                <div class="list-title">진행중인 건의</div>
+                <div class="suggestion-item">
+                    <div class="suggestion-title">급식 메뉴 개선 요청</div>
+                    <div class="suggestion-date">2025.10.03 <span class="status-badge status-pending">검토중</span></div>
+                </div>
+                <div class="suggestion-item">
+                    <div class="suggestion-title">체육관 시설 보수</div>
+                    <div class="suggestion-date">2025.10.01 <span class="status-badge status-pending">접수됨</span></div>
+                </div>
+
+                <div class="list-title" style="margin-top: 20px;">답변 완료</div>
+                <div class="suggestion-item">
+                    <div class="suggestion-title">도서관 운영시간 연장</div>
+                    <div class="suggestion-date">2025.09.28 <span class="status-badge status-completed">완료</span></div>
+                </div>
+                <div class="suggestion-item">
+                    <div class="suggestion-title">교복 규정 완화</div>
+                    <div class="suggestion-date">2025.09.25 <span class="status-badge status-completed">완료</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>학교 건의함</h1>
+                <p>학교 생활 개선을 위한 여러분의 소중한 의견을 들려주세요</p>
+            </div>
+
+            <div class="suggestion-area">
+                <div class="input-section">
+                    <select class="category-select">
+                        <option value="">카테고리 선택</option>
+                        <option value="facility">시설 관련</option>
+                        <option value="meal">급식 관련</option>
+                        <option value="uniform">교복/복장 관련</option>
+                        <option value="study">학습 환경</option>
+                        <option value="event">행사/동아리</option>
+                        <option value="other">기타</option>
+                    </select>
+
+                    <input type="text" class="title-input" placeholder="건의 제목을 입력하세요..." />
+
+                    <textarea class="content-textarea" placeholder="건의 내용을 자세히 적어주세요...&#10;&#10;• 현재 상황과 문제점&#10;• 개선 방안 제안&#10;• 기대 효과 등을 포함해 주시면 더욱 좋습니다."></textarea>
+
+                    <div class="submit-section">
+                        <div class="anonymous-check">
+                            <input type="checkbox" id="anonymous" />
+                            <label for="anonymous">익명으로 제출</label>
+                        </div>
+                        <button class="submit-btn" onclick="submitSuggestion()">건의하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAoGGM7daU7iXqn1N4dKK1zpyUnOTsy6i0",
+    authDomain: "kcjahs-suggection.firebaseapp.com",
+    projectId: "kcjahs-suggection",
+    storageBucket: "kcjahs-suggection.firebasestorage.app",
+    messagingSenderId: "680058871961",
+    appId: "1:680058871961:web:6931fb143e6d1ce2a8d808",
+    measurementId: "G-M84BJH4Z8P"
+  };
+
+  // 초기화
+  firebase.initializeApp(firebaseConfig);
+
+  // 전역 변수로 선언
+  window.auth = firebase.auth();
+  window.db   = firebase.firestore();
+</script>
+    <script>
+        //회원가입 처리
+        async function handleSignUp() {
+          const id = document.getElementById('studentId').value;
+          const pw = document.getElementById('password').value;
+          try {
+            await auth.createUserWithEmailAndPassword(id + '@kimcheon.hs', pw);
+            alert('회원가입 완료');
+          } catch (e) {
+            alert('회원가입 실패: ' + e.message);
+          }
+        }
+
+        //로그인 처리
+        async function handleLogin() {
+          const id = document.getElementById('studentId').value;
+          const pw = document.getElementById('password').value;
+          try {
+            await auth.signInWithEmailAndPassword(id + '@kimcheon.hs', pw);
+            const u = auth.currentUser;
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('userInfo').classList.add('active');
+            document.getElementById('userName').textContent  = u.email.split('@')[0];
+            document.getElementById('userClass').textContent = '로그인 성공';
+            renderSuggestionLists();  // 학생별 데이터 로드
+          } catch (e) {
+            alert('로그인 실패: ' + e.message);
+          }
+        }
+
+        //로그아웃 처리
+        function handleLogout() {
+          auth.signOut();
+          document.getElementById('loginSection').style.display = 'block';
+          document.getElementById('userInfo').classList.remove('active');
+        }
+
+        // 건의 제출
+        async function submitSuggestion() {
+          const u = auth.currentUser;
+          if (!u) return alert('로그인 후 이용하세요');
+          const title    = document.querySelector('.title-input').value.trim();
+          const content  = document.querySelector('.content-textarea').value.trim();
+          const category = document.querySelector('.category-select').value;
+          // 유효성 검사 생략…
+
+          await db.collection('suggestions').add({
+            uid: u.uid,
+            title, content, category,
+            date: firebase.firestore.Timestamp.now(),
+            status: 'pending'
+          });
+          alert('전송 완료');
+          renderSuggestionLists();
+        }
+
+            //목록 렌더링
+            function renderSuggestionLists() {
+              const u = auth.currentUser;
+              if (!u) return;
+              db.collection('suggestions')
+              .where('uid', '==', u.uid)
+              .orderBy('date', 'desc')
+              .onSnapshot(snapshot => {
+                const pendingEl   = document.querySelector('.suggestion-lists .list-title:nth-of-type(1)').nextElementSibling;
+                const completedEl = document.querySelector('.status-completed').parentElement.parentElement;
+                pendingEl.innerHTML   = '';
+                completedEl.innerHTML = '';
+                snapshot.forEach(doc => {
+                  const data = doc.data();
+                  const item = document.createElement('div');
+                  item.className = 'suggestion-item';
+                  item.innerHTML = `
+                  <div class="suggestion-title">${data.title}</div>
+                  <div class="suggestion-date">
+                  ${data.date.toDate().toISOString().split('T')[0]}
+                  <span class="status-badge ${data.status==='completed'?'status-completed':'status-pending'}">
+                  ${data.status==='completed'?'완료':'검토중'}
+                  </span>
+                  </div>`;
+                  if (data.status==='completed') completedEl.appendChild(item);
+                  else pendingEl.appendChild(item);
+                });
+              });
+            }
+
+            // 폼 초기화
+            document.querySelector('.title-input').value = '';
+            document.querySelector('.content-textarea').value = '';
+            document.querySelector('.category-select').value = '';
+            document.getElementById('anonymous').checked = false;
+
+        // 건의 목록 클릭 이벤트
+        document.querySelectorAll('.suggestion-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const title = this.querySelector('.suggestion-title').textContent;
+                alert(`"${title}" 건의를 확인합니다.`);
+            });
+        });
+    </script>
+</body>
+</html>
