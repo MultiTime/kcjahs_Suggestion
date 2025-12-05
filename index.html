@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>김천중앙고등학교 중앙청원</title>
     <link rel="icon" href="rogo2.png" style="width: 10000px;">
-    <!-- 1) Firebase SDK 로드 (반드시 가장 위) -->
-    <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore-compat.js"></script>
+    
     <style>
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR&display=swap');
         * {
@@ -45,7 +42,6 @@
             padding: 20px;
             background-color: #ffffff;
             border-radius: 10px;
-            /*box-shadow: 0 2px 8px rgba(0,0,0,0.1);*/
         }
 
         .logo {
@@ -77,7 +73,6 @@
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
-            /*box-shadow: 0 2px 8px rgba(0,0,0,0.1);*/
         }
 
         .login-form input {
@@ -112,7 +107,6 @@
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
-            /*box-shadow: 0 2px 8px rgba(0,0,0,0.1);*/
             display: none;
         }
 
@@ -135,7 +129,6 @@
             background-color: #ffffff;
             padding: 20px;
             border-radius: 10px;
-            /*box-shadow: 0 2px 8px rgba(0,0,0,0.1);*/
         }
 
         .list-title {
@@ -356,48 +349,36 @@
 </head>
 <body>
     <div class="container">
-        <!-- 사이드바 -->
         <div class="sidebar" id="sidebar">
-            <!-- 로고 섹션 -->
             <div class="logo-section">
                 <div class="logo"><img src="rogo1.png" style="width: 135%;"></div>
                 <div class="school-name" style="font-size: 17px;">김천중앙고등학교<div style="font-size: 32px; margin-top: -6px; font-weight: bold;">중앙청원</div></div>
             </div>
 
-            <!-- 로그인 섹션 -->
             <div class="login-section" id="loginSection" style="margin-top: -10px;">
               <div class="login-form">
                 <input type="text" id="studentId" placeholder="학번" />
                 <input type="password" id="password" placeholder="비밀번호" />
                 <button class="login-btn" onclick="handleLogin()">로그인</button>
-                <button class="login-btn" onclick="handleSignUp()" style="margin-top: 10px;">회원가입</button>  <!-- 추가 -->
+                <button class="login-btn" onclick="handleSignUp()" style="margin-top: 10px;">회원가입</button>
               </div>
             </div>
 
-            <!-- 사용자 정보 섹션 -->
             <div class="user-info" id="userInfo">
                 <div class="user-name" id="userName">홍길동</div>
                 <div class="user-class" id="userClass">2학년 3반</div>
                 <button class="login-btn" onclick="handleLogout()" style="margin-top: 10px;">로그아웃</button>
             </div>
 
-            <!-- 건의 목록 섹션 -->
             <div class="suggestion-lists">
               <div class="list-title">진행중인 건의</div>
-              <div class="pending-list"></div>        <!-- 컨테이너 추가 -->
-
-              <div class="list-title" style="margin-top: 20px;">답변 완료</div>
-              <div class="completed-list"></div>      <!-- 컨테이너 추가 -->
-            </div>
+              <div class="pending-list"></div>        <div class="list-title" style="margin-top: 20px;">답변 완료</div>
+              <div class="completed-list"></div>      </div>
         </div>
 
-        <!-- 메인 콘텐츠 -->
         <div class="main-content">
             <div class="header">
-                <div><input type="button" class="colorchange"> <!--Gray-->
-                <input type="button" class="colorchange_1"> <!--Red-->
-                <input type="button" class="colorchange_2"></div> <!--Blue-->
-                <div style="padding-top: 10px; font-size: 18px;">학교 생활 개선을 위한 여러분의 소중한 의견을 들려주세요</div>
+                <div><input type="button" class="colorchange"> <input type="button" class="colorchange_1"> <input type="button" class="colorchange_2"></div> <div style="padding-top: 10px; font-size: 18px;">학교 생활 개선을 위한 여러분의 소중한 의견을 들려주세요</div>
             </div>
 
             <div class="suggestion-area">
@@ -425,177 +406,208 @@
             </div>
         </div>
     </div>
-    <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyAoGGM7daU7iXqn1N4dKK1zpyUnOTsy6i0",
-    authDomain: "kcjahs-suggection.firebaseapp.com",
-    projectId: "kcjahs-suggection",
-    storageBucket: "kcjahs-suggection.firebasestorage.app",
-    messagingSenderId: "680058871961",
-    appId: "1:680058871961:web:6931fb143e6d1ce2a8d808",
-    measurementId: "G-M84BJH4Z8P"
-  };
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  // 초기화
-  firebase.initializeApp(firebaseConfig);
-
-  // 전역 변수로 선언
-  window.auth = firebase.auth();
-  window.db   = firebase.firestore();
-
-
-
-            // 폼 초기화
-            document.querySelector('.title-input').value = '';
-            document.querySelector('.content-textarea').value = '';
-            document.querySelector('.category-select').value = '';
-            document.getElementById('anonymous').checked = false;
-
-        // 건의 목록 클릭 이벤트
-        document.querySelectorAll('.suggestion-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const title = this.querySelector('.suggestion-title').textContent;
-                alert(`"${title}" 건의를 확인합니다.`);
-            });
-        });
-    </script>
     <script>
-      // 건의 제출
-      async function submitSuggestion() {
-        // 로그인 여부 확인 및 user 변수 선언
-        const user = auth.currentUser;
-        if (!user) {
-          alert('로그인 후 이용해 주세요.');
-          return;
+        // 1. Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoGGM7daU7iXqn1N4dKK1zpyUnOTsy6i0",
+            authDomain: "kcjahs-suggection.firebaseapp.com",
+            projectId: "kcjahs-suggection",
+            storageBucket: "kcjahs-suggection.firebasestorage.app",
+            messagingSenderId: "680058871961",
+            appId: "1:680058871961:web:6931fb143e6d1ce2a8d808",
+            measurementId: "G-M84BJH4Z8P"
+        };
+
+        // 2. Firebase 초기화
+        firebase.initializeApp(firebaseConfig);
+        
+        // 전역 변수 선언
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // 3. 페이지 로드 시 초기화 작업
+        window.onload = function() {
+            // 입력 필드 초기화
+            const titleInput = document.querySelector('.title-input');
+            if(titleInput) titleInput.value = '';
+            
+            const contentArea = document.querySelector('.content-textarea');
+            if(contentArea) contentArea.value = '';
+            
+            const catSelect = document.querySelector('.category-select');
+            if(catSelect) catSelect.value = '';
+            
+            const anonCheck = document.getElementById('anonymous');
+            if(anonCheck) anonCheck.checked = false;
+
+            // 로그인 상태 감지 (새로고침 해도 로그인 유지)
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // 로그인 된 상태
+                    console.log("로그인 됨:", user.email);
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('userInfo').classList.add('active');
+                    document.getElementById('userName').textContent = user.email.split('@')[0];
+                    document.getElementById('userClass').textContent = '로그인 성공';
+                    renderSuggestionLists(); 
+                } else {
+                    // 로그아웃 된 상태
+                    console.log("로그아웃 됨");
+                    document.getElementById('loginSection').style.display = 'block';
+                    document.getElementById('userInfo').classList.remove('active');
+                }
+            });
+        };
+
+        // 4. 회원가입 함수
+        async function handleSignUp() {
+            const id = document.getElementById('studentId').value;
+            const pw = document.getElementById('password').value;
+
+            if (!id || !pw) {
+                alert("학번과 비밀번호를 모두 입력해주세요.");
+                return;
+            }
+
+            try {
+                // 이메일 형식으로 변환하여 생성
+                await auth.createUserWithEmailAndPassword(id + '@kimcheon.hs', pw);
+                alert('회원가입 완료! 자동으로 로그인됩니다.');
+            } catch (e) {
+                let msg = "회원가입 실패: ";
+                if(e.code === 'auth/email-already-in-use') msg += "이미 가입된 학번입니다.";
+                else if(e.code === 'auth/weak-password') msg += "비밀번호는 6자리 이상이어야 합니다.";
+                else msg += e.message;
+                alert(msg);
+            }
         }
 
-        const title    = document.querySelector('.title-input').value.trim();
-        const content  = document.querySelector('.content-textarea').value.trim();
-        const category = document.querySelector('.category-select').value;
-        const anon     = document.getElementById('anonymous').checked;
+        // 5. 로그인 함수
+        async function handleLogin() {
+            const id = document.getElementById('studentId').value;
+            const pw = document.getElementById('password').value;
 
-        // 유효성 검사
-        if (!category) {
-          alert('카테고리를 선택해주세요.');
-          return;
+            if (!id || !pw) {
+                alert("학번과 비밀번호를 입력해주세요.");
+                return;
+            }
+
+            try {
+                await auth.signInWithEmailAndPassword(id + '@kimcheon.hs', pw);
+                // 성공 시 onAuthStateChanged가 처리하므로 별도 알림 불필요
+            } catch (e) {
+                let msg = "로그인 실패: ";
+                if(e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
+                    msg += "학번 또는 비밀번호가 잘못되었습니다.";
+                } else {
+                    msg += e.message;
+                }
+                alert(msg);
+            }
         }
 
-        if (!title.trim()) {
-          alert('제목을 입력해주세요.');
-          return;
+        // 6. 로그아웃 함수
+        function handleLogout() {
+            auth.signOut();
+            // 목록 비우기
+            const pendingEl = document.querySelector('.pending-list');
+            const completedEl = document.querySelector('.completed-list');
+            if (pendingEl) pendingEl.innerHTML = '';
+            if (completedEl) completedEl.innerHTML = '';
+            alert("로그아웃 되었습니다.");
         }
 
-        if (!content.trim()) {
-          alert('내용을 입력해주세요.');
-          return;
+        // 7. 건의 제출 함수
+        async function submitSuggestion() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('로그인 후 이용해 주세요.');
+                return;
+            }
+
+            const title = document.querySelector('.title-input').value.trim();
+            const content = document.querySelector('.content-textarea').value.trim();
+            const category = document.querySelector('.category-select').value;
+            const anon = document.getElementById('anonymous').checked;
+
+            if (!category) return alert('카테고리를 선택해주세요.');
+            if (!title) return alert('제목을 입력해주세요.');
+            if (!content) return alert('내용을 입력해주세요.');
+
+            try {
+                await db.collection('suggestions').add({
+                    uid: user.uid,
+                    authorId: anon ? '익명' : user.email.split('@')[0], 
+                    title: title,
+                    content: content,
+                    category: category,
+                    date: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'pending',
+                    anonymous: anon
+                });
+                
+                // 초기화
+                document.querySelector('.title-input').value = '';
+                document.querySelector('.content-textarea').value = '';
+                document.querySelector('.category-select').value = '';
+                document.getElementById('anonymous').checked = false;
+                
+                alert('건의가 성공적으로 제출되었습니다!');
+            } catch (e) {
+                console.error(e);
+                alert('제출 실패: ' + e.message);
+            }
         }
 
-        try {
-          await db.collection('suggestions').add({
-            uid:      user.uid,
-            title, content, category,
-            date:     firebase.firestore.Timestamp.now(),
-            status:   'pending',
-            anonymous: anon
-          });
-          // 입력 필드 초기화
-          document.querySelector('.title-input').value       = '';
-          document.querySelector('.content-textarea').value   = '';
-          document.querySelector('.category-select').value    = '';
-          document.getElementById('anonymous').checked        = false;
-          alert('건의가 성공적으로 제출되었습니다!');
-        } catch (e) {
-          alert('제출에 실패했습니다: ' + e.message);
+        // 8. 목록 렌더링
+        function renderSuggestionLists() {
+            const pendingEl = document.querySelector('.pending-list');
+            const completedEl = document.querySelector('.completed-list');
+
+            db.collection('suggestions')
+                .orderBy('date', 'desc')
+                .onSnapshot(snapshot => {
+                    pendingEl.innerHTML = '';
+                    completedEl.innerHTML = '';
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const dateObj = data.date ? data.date.toDate() : new Date();
+                        const dateStr = dateObj.toISOString().split('T')[0];
+                        
+                        const el = document.createElement('div');
+                        el.className = 'suggestion-item';
+                        
+                        el.onclick = function() {
+                            alert(`[${data.category}]\n제목: ${data.title}\n내용: ${data.content}`);
+                        };
+
+                        el.innerHTML = `
+                            <div class="suggestion-title">
+                            [${data.category}] ${data.title}
+                            </div>
+                            <div class="suggestion-date">
+                                ${dateStr} | ${data.anonymous ? '익명' : (data.authorId || '학생')}
+                                <span class="status-badge ${data.status === 'completed' ? 'status-completed' : 'status-pending'}">
+                                    ${data.status === 'completed' ? '완료' : '검토중'}
+                                </span>
+                            </div>`;
+
+                        if (data.status === 'completed') {
+                            completedEl.appendChild(el);
+                        } else {
+                            pendingEl.appendChild(el);
+                        }
+                    });
+                }, (error) => {
+                    console.error("데이터 불러오기 실패:", error);
+                });
         }
-      }
-
-  //목록 렌더링
-  function renderSuggestionLists() {
-  const pendingEl   = document.querySelector('.pending-list');
-  const completedEl = document.querySelector('.completed-list');
-
-  db.collection('suggestions')
-    //.where('uid', '==', auth.currentUser.uid)
-    .orderBy('date', 'desc')
-    .onSnapshot(snapshot => {
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const dateStr = data.date.toDate().toISOString().split('T')[0];
-        const el = document.createElement('div');
-        el.className = 'suggestion-item';
-        el.innerHTML = `
-          <div class="suggestion-title">${data.title}</div>
-          <div class="suggestion-date">
-            ${dateStr}
-            <span class="status-badge ${
-              data.status === 'completed'
-                ? 'status-completed'
-                : 'status-pending'
-            }">
-              ${data.status === 'completed' ? '완료' : '검토중'}
-            </span>
-          </div>`;
-        if (data.status === 'completed') {
-          completedEl.appendChild(el);
-        } else {
-          pendingEl.appendChild(el);
-        }
-      });
-    });
-}
-
-  //로그인 처리
-  async function handleLogin() {
-    const id = document.getElementById('studentId').value;
-    const pw = document.getElementById('password').value;
-    try {
-      await auth.signInWithEmailAndPassword(id + '@kimcheon.hs', pw);
-      const u = auth.currentUser;
-      document.getElementById('loginSection').style.display = 'none';
-      document.getElementById('userInfo').classList.add('active');
-      document.getElementById('userName').textContent  = u.email.split('@')[0];
-      document.getElementById('userClass').textContent = '로그인 성공';
-      renderSuggestionLists();  // 학생별 데이터 로드
-    } catch (e) {
-      alert('로그인 실패: ' + e.message);
-    }
-  }
-
-  //로그아웃 처리
-  function handleLogout() {
-    auth.signOut();
-    // 로그인 UI 토글
-    document.getElementById('loginSection').style.display = 'block';
-    document.getElementById('userInfo').classList.remove('active');
-
-    // 건의 목록 초기화
-    const pendingEl   = document.querySelector('.pending-list');
-    const completedEl = document.querySelector('.completed-list');
-    if (pendingEl)   pendingEl.innerHTML   = '';
-    if (completedEl) completedEl.innerHTML = '';
-  }
-
-</script>
-<script>
-//회원가입 처리
-async function handleSignUp() {
-  const id = document.getElementById('studentId').value;
-  const pw = document.getElementById('password').value;
-  try {
-    await auth.createUserWithEmailAndPassword(id + '@kimcheon.hs', pw);
-    alert('회원가입 완료');
-  } catch (e) {
-    alert('회원가입 실패: ' + e.message);
-  }
-}
-</script>
+    </script>
 </body>
 </html>
