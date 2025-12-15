@@ -187,3 +187,18 @@
                     console.error("데이터 불러오기 실패:", error);
                 });
         }
+
+        // 9. 수정 기능(개발자님 추가)
+        if (data.uid === auth.currentUser.uid) {
+          el.innerHTML += <button onclick="editSuggestion('${doc.id}')">수정</button>;
+        }
+
+        // 10. 검색창 추가 기능(개발자님 추가)
+        function searchSuggestions(keyword) {
+          const items = document.querySelectorAll('.suggestion-item'); items.forEach(item => {
+            const text = item.textContent.toLowerCase(); item.style.display = text.includes(keyword.toLowerCase()) ? 'block' : 'none';
+          });
+
+        // 11. 로딩화면 기능(개발자님 추가)
+        function showLoading() { document.body.innerHTML +=
+          `로딩 중...`
