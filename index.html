@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>김천중앙고등학교 중앙청원</title>
-    <link rel="icon" href="rogo2.png" style="width: 10000px;">
-    <link rel="stylesheet" href="style.css">
-</head>
+    <title>김천중앙고 학생회 중앙청원</title>
+    <link rel="icon" href="rogo2.png">
+    </head>
 <body>
+    <div id="loadingOverlay">
+        <div>불러오는 중</div>
+    </div>
+
     <div class="container">
         <div class="sidebar" id="sidebar">
             <div class="logo-section">
-                <div class="logo"><img src="rogo1.png"></div>
-                <div class="school-name">김천중앙고등학교<div>중앙청원</div></div>
+                <a href="https://school.gyo6.net/kcjahs/main.do?sysId=kcjahs" style="text-decoration: none; color: #333;"><div class="logo"><img src="rogo1.png"></div>
+                <div class="school-name">김천중앙고등학교</a> 학생회<div>중앙청원&nbsp<span style="font-size: 17px; background-color: #B3E5FC; font-weight: 500;"> BETA&nbsp</span></div></div>
             </div>
+
+            <input type="text" class="search-box" placeholder="건의사항 검색..." onkeyup="searchSuggestions(this.value)" />
 
             <div class="login-section" id="loginSection">
               <div class="login-form">
-                <input type="text" id="studentId" placeholder="학번" />
-                <input type="password" id="password" placeholder="비밀번호" />
+                <input type="text" id="studentId" placeholder="학번" style="background-color: #F5F5F5;"/>
+                <input type="password" id="password" placeholder="비밀번호" style="background-color: #F5F5F5;"/>
                 <button class="login-btn" onclick="handleLogin()">로그인</button>
-                <button class="login-btn" onclick="handleSignUp()" style="margin-top: 10px;">회원가입</button>
+                <!--<button class="login-btn" onclick="handleSignUp()" style="margin-top: 10px; background-color: #fff; border: 1px solid #ccc;">회원가입</button>-->
               </div>
             </div>
 
@@ -33,7 +38,7 @@
             <div class="suggestion-lists">
               <div class="list-title">진행중인 건의</div>
               <div class="pending-list"></div>
-              
+
               <div class="list-title" style="margin-top: 20px;">답변 완료</div>
               <div class="completed-list"></div>
             </div>
@@ -43,9 +48,7 @@
             <div class="main-wrapper">
                 <div class="header">
                     <div class="header-controls">
-                        <button class="colorchange"></button>
-                        <button class="colorchange_1"></button>
-                        <button class="colorchange_2"></button>
+                        <button class="colorchange"></button><button class="colorchange_1"></button><button class="colorchange_2"></button>
                     </div>
                     <div class="page-title">학교 생활 개선을 위한<br>여러분의 소중한 의견을 들려주세요</div>
                 </div>
@@ -62,12 +65,9 @@
                                 <option value="행사/동아리">행사/동아리</option>
                                 <option value="기타">기타</option>
                             </select>
-                            
                             <input type="text" class="title-input" placeholder="건의 제목을 입력하세요..." />
                         </div>
-
-                        <textarea class="content-textarea" placeholder="건의 내용을 자세히 적어주세요...&#10;&#10;• 현재 상황과 문제점&#10;• 개선 방안 제안&#10;• 기대 효과 등을 포함해 주시면 더욱 좋습니다."></textarea>
-
+                        <textarea class="content-textarea" placeholder="건의 내용을 자세히 적어주세요..."></textarea>
                         <div class="submit-section">
                             <div class="anonymous-check">
                                 <input type="checkbox" id="anonymous" />
@@ -79,11 +79,9 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="app.js"></script>
 </body>
 </html>
