@@ -182,6 +182,10 @@
     </style>
 </head>
 <body>
+  <div id="maintenanceOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 999999; justify-content: center; align-items: center; flex-direction: column; text-align: center;">
+        <h1 style="font-size: 32px; margin-bottom: 20px;">점검 중입니다</h1>
+        <p style="font-size: 18px; color: #666; line-height: 1.5;">보다 안정적인 서비스를 위해 현재 시스템 점검을 진행하고 있습니다.<br>점검이 끝난 후 다시 접속해 주세요.</p>
+    </div>
     <div id="loadingOverlay">
         <div>불러오는 중...</div>
     </div>
@@ -282,7 +286,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -302,6 +305,16 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+
+        // 📢 점검 모드 실시간 감지 (이 코드가 작동해야 화면이 가려집니다)
+        db.collection("settings").doc("system").onSnapshot((doc) => {
+            const overlay = document.getElementById('maintenanceOverlay');
+            if (doc.exists && doc.data().isMaintenanceMode === true) {
+                overlay.style.display = 'flex'; // 점검 모드면 가림막 표시
+            } else {
+                overlay.style.display = 'none'; // 평소에는 숨김
+            }
+        });
 
         window.isSigningUp = false;
 
