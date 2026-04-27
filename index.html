@@ -300,32 +300,29 @@
             document.querySelector('.category-select').value = '';
             document.getElementById('anonymous').checked = false;
 
-            // 🔥 [핵심 변경] Auth 기준 로그인 통과 & users DB는 상태 검사용으로만 유연하게 사용
             auth.onAuthStateChanged(async (user) => {
                 if (window.isSigningUp && user) return;
 
                 if (user) {
                     toggleLoading(true);
                     try {
-                        // 1. Firebase Auth는 이미 통과했으니, 추가로 DB 상태 검사만 진행
                         const userDoc = await db.collection('users').doc(user.uid).get();
 
                         if (userDoc.exists) {
                             const status = userDoc.data().status;
 
-                            // DB에 기록된 상태가 차단 사유에 해당하면 튕겨냄
                             if (status === 'pending') {
                                 await auth.signOut();
                                 showAlertModal("가입 승인 대기 중", "학생회에서 계정을 확인하고 있습니다.<br>승인이 완료된 후 이용하실 수 있습니다.");
                                 toggleLoading(false);
                                 return;
-                            }
+                            } 
                             else if (status === 'rejected') {
                                 await auth.signOut();
                                 showAlertModal("접속 차단됨", "가입이 거절되었거나 영구 탈퇴 처리된 계정입니다.");
                                 toggleLoading(false);
                                 return;
-                            }
+                            } 
                             else if (status === 'suspended') {
                                 await auth.signOut();
                                 showAlertModal("이용 정지 안내", "운영원칙 위반 등의 사유로 계정 이용이 정지되었습니다.<br>이의 제기는 학생회로 문의해주세요.");
@@ -333,8 +330,7 @@
                                 return;
                             }
                         }
-
-                        // 2. DB 문서가 아예 없거나(예전 가입자) 상태가 active인 경우, 무조건 로그인 통과!
+                        
                         console.log("로그인 성공");
                         document.getElementById('loginSection').style.display = 'none';
                         document.getElementById('userInfo').classList.add('active');
@@ -344,14 +340,13 @@
 
                     } catch(e) {
                         console.error("DB 상태 확인 오류:", e);
-                        // DB 규칙 오류가 나도 로그인은 Auth 기준이므로 통과시킴
                         document.getElementById('loginSection').style.display = 'none';
                         document.getElementById('userInfo').classList.add('active');
                         document.getElementById('userName').textContent = user.email.split('@')[0] + " 님";
                         document.getElementById('userClass').textContent = '학생 계정';
                         renderSuggestionLists();
                     } finally {
-                        toggleLoading(false);
+                        toggleLoading(false); 
                     }
                 } else {
                     console.log("로그아웃 상태");
@@ -370,7 +365,7 @@
             if (pw !== pwConfirm) return showAlertModal("입력 오류", "비밀번호가 일치하지 않습니다.");
             if (pw.length < 6) return showAlertModal("보안 약함", "비밀번호는 6자리 이상이어야 합니다.");
 
-            window.isSigningUp = true;
+            window.isSigningUp = true; 
             toggleLoading(true);
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(id + '@kimcheon.hs', pw);
@@ -390,7 +385,7 @@
                 else msg += e.message;
                 showAlertModal("오류 발생", msg);
             } finally {
-                window.isSigningUp = false;
+                window.isSigningUp = false; 
                 toggleLoading(false);
             }
         }
@@ -414,7 +409,6 @@
                 await auth.signInWithEmailAndPassword(id + '@kimcheon.hs', pw);
                 localStorage.removeItem(failKey);
                 localStorage.removeItem(blockKey);
-                // 로그인 성공 시 onAuthStateChanged 가 로딩을 끄고 UI를 변경합니다.
             } catch (e) {
                 let fails = parseInt(localStorage.getItem(failKey) || '0') + 1;
                 localStorage.setItem(failKey, fails);
@@ -430,7 +424,7 @@
                     }
                     showAlertModal("로그인 실패", `${msg} <br>(실패 횟수: ${fails}/5)`);
                 }
-                toggleLoading(false);
+                toggleLoading(false); 
             }
         }
 
@@ -444,6 +438,15 @@
             const user = auth.currentUser;
             if (!user) return showAlertModal("권한 없음", "로그인 후 이용해 주세요.");
 
+            // 🔥 [추가됨] 2. 5분 도배 방지 기능 추가
+            const lastTime = localStorage.getItem('lastSubmitTime_' + user.uid);
+            if (lastTime && Date.now() - parseInt(lastTime) < 5 * 60 * 1000) {
+                const remainSec = Math.ceil((5 * 60 * 1000 - (Date.now() - parseInt(lastTime))) / 1000);
+                const remainMin = Math.floor(remainSec / 60);
+                const remainSecRemainder = remainSec % 60;
+                return showAlertModal("도배 방지", `건의는 5분에 한 번씩만 가능합니다.<br>${remainMin}분 ${remainSecRemainder}초 후에 다시 시도해주세요.`);
+            }
+
             const title = document.querySelector('.title-input').value.trim();
             const content = document.querySelector('.content-textarea').value.trim();
             const category = document.querySelector('.category-select').value;
@@ -455,12 +458,16 @@
             try {
                 await db.collection('suggestions').add({
                     uid: user.uid,
-                    authorId: anon ? '익명' : user.email.split('@')[0],
+                    // 🔥 [추가됨] 1. 무조건 작성자의 실제 학번을 authorId로 저장 (익명 체크 상관없음)
+                    authorId: user.email.split('@')[0], 
                     title, content, category,
                     date: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'pending',
-                    anonymous: anon
+                    anonymous: anon // 프론트엔드용 익명 스위치
                 });
+
+                // 성공적으로 업로드 후 로컬 스토리지에 현재 시간 저장
+                localStorage.setItem('lastSubmitTime_' + user.uid, Date.now());
 
                 document.querySelector('.title-input').value = '';
                 document.querySelector('.content-textarea').value = '';
@@ -500,7 +507,8 @@
                         };
 
                         let actionButtons = '';
-                        if (auth.currentUser && data.uid === auth.currentUser.uid) {
+                        // 🔥 [추가됨] 3. 본인 글이면서 답변 상태가 completed(완료)가 아닐 때만 수정/삭제 버튼 노출
+                        if (auth.currentUser && data.uid === auth.currentUser.uid && data.status !== 'completed') {
                             actionButtons = `
                                 <div class="item-actions">
                                     <button class="action-btn btn-edit" onclick="event.stopPropagation(); editSuggestion('${docId}')">수정</button>
