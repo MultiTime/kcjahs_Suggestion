@@ -5,18 +5,184 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>김천중앙고 학생회 중앙청원</title>
     <link rel="icon" href="rogo2.png">
-    <link rel="stylesheet" href="style.css">
-    </head>
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;700&display=swap');
+              * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'IBM Plex Sans KR', sans-serif; }
+              body { font-family: 'IBM Plex Sans KR', sans-serif; background-color: #ffffff; color: #333; height: 100vh; overflow: hidden; display: flex; --scrollbar-width: none;}
+              .container { display: flex; height: 100vh; width: 100%; }
+
+              /* === 사이드바 === */
+              .sidebar {
+                  width: 365px;
+                  background-color: #fff;
+                  padding: 20px;
+                  overflow-y: auto;
+                  flex-shrink: 0;
+                  border-right: 1px solid #e5e5e5;
+              }
+
+              .logo-section { text-align: center; margin-bottom: 20px; padding: 20px; background-color: #ffffff;}
+              .logo { width: 80px; height: 80px; background-color: #333; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; }
+              .logo img { width: 135%; }
+
+              .school-name { color: #333; font-size: 18px; }
+              .school-name div { font-size: 40px; margin-top: -6px; font-weight: bold; margin-bottom: -20px; }
+
+              /* 검색창 */
+              .search-box { width: 100%; padding: 14px; margin-bottom: 20px; border: none; border-radius: 8px; font-size: 17px; background-color: #F5F5F5; }
+              .search-box:focus { outline: none; border-color: #333; }
+
+              /* 로그인 섹션 */
+              .login-section { background-color: #F5F5F5; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #F5F5F5; }
+              .login-form input { width: 100%; padding: 10px; margin-bottom: 12px; border: none; border-bottom: 1px solid #ccc; font-size: 17px; outline: none; }
+
+              /* 로그인 버튼들 */
+              .login-btn { width: 100%; padding: 14px; margin-top: 10px; background-color: #555; color: #fff; border: none; border-radius: 10px; cursor: pointer; transition: 300ms ease; font-weight: 600; font-size: 16px;}
+              .login-btn:hover { background-color: #222; }
+
+              .signup-btn-trigger { background-color: #fff; color: #333; border: 1px solid #ccc; margin-top: 10px; }
+              .signup-btn-trigger:hover { background-color: #eaeaea; }
+
+              /* 유저 정보 */
+              .user-info { background-color: #F5F5F5; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: none; border: 1px solid #eee; }
+              .user-info.active { display: block; }
+              .user-name { font-weight: bold; margin-bottom: 5px; font-size: 20px;}
+              .user-class { color: #666; font-size: 16px; margin-bottom: 6px; }
+
+              /* 건의 목록 */
+              .suggestion-lists { background-color: #F5F5F5; padding: 20px; border-radius: 10px; border: 1px solid #F5F5F5; }
+              .list-title { font-size: 19px; font-weight: bold; margin-bottom: 15px; color: #222; padding-bottom: 10px; border-bottom: 1px solid #ccc; }
+
+              .suggestion-item { padding: 16px; margin-bottom: 15px; background-color: #fff; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; position: relative; }
+              .suggestion-item:hover { background-color: #ddd; }
+              .suggestion-title { font-size: 16px; font-weight: bold; margin-bottom: 6px; color: #333; }
+              .suggestion-date { font-size: 14px; color: #888; }
+
+              /* 상태 배지 */
+              .status-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+              .status-pending { background-color: #FFEDB8; color: #000; }
+              .status-completed { background-color: #B8FFF1; color: #000; }
+
+              /* 수정/삭제 버튼 */
+              .item-actions { margin-top: 10px; text-align: right; border-top: 1px solid #f0f0f0; padding-top: 8px; }
+              .action-btn { font-size: 13px; padding: 5px 10px; margin-left: 5px; border: none; border-radius: 4px; cursor: pointer; }
+              .btn-edit { background-color: #333; color: #fff; transition: 0.2s ease;}
+              .btn-edit:hover { background-color: #777; color: #fff; }
+              .btn-delete { background-color: #f1f1f1; color: #333; transition: 0.2s ease;}
+              .btn-delete:hover { background-color: #ffdddd; color: red; }
+
+              /* === 메인 콘텐츠 === */
+              .main-content { flex: 1; display: flex; flex-direction: column; padding: 50px 40px; background-color: #ffffff; align-items: center; }
+              .main-wrapper { max-width: 800px; width: 100%; display: flex; flex-direction: column; }
+
+              .header { text-align: left; margin-bottom: 40px; }
+              .header-controls { display: flex; gap: 6px; margin-bottom: 15px; }
+              .page-title { font-size: 28px; font-weight: 600; color: #1a1a1a; line-height: 1.4; }
+
+              /* 입력 영역 */
+              .suggestion-area { flex: 1; width: 100%; }
+              .input-section { background: transparent; border: none; padding: 0; margin-bottom: 20px; }
+
+              .input-row { display: flex; gap: 12px; margin-bottom: 16px; }
+              .category-select { width: 160px; flex-shrink: 0; border: 1px solid #e0e0e0; border-radius: 12px; padding: 18px; font-size: 16px; background-color: #fff; }
+              .title-input { flex: 1; border: 1px solid #e0e0e0; border-radius: 12px; padding: 18px; font-size: 20px; font-weight: 600; background-color: #fff; }
+              .content-textarea { width: 100%; border: 1px solid #e0e0e0; border-radius: 12px; padding: 18px; font-size: 16px; background-color: #fff; margin-bottom: 16px; min-height: 300px; resize: none; line-height: 1.6; }
+              .category-select:focus, .title-input:focus, .content-textarea:focus { border-color: #333; outline: none; }
+
+              .submit-section { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 20px; border-top: 1px solid #f0f0f0; }
+              .anonymous-check { display: flex; align-items: center; gap: 8px; color: #555; cursor: pointer; font-size: 16px; }
+              .anonymous-check input { width: 18px; height: 18px; cursor: pointer; accent-color: #1a1a1a; }
+              .submit-btn { padding: 14px 36px; background-color: #1a1a1a; color: white; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background-color 0.3s; }
+              .submit-btn:hover { background-color: #444; }
+
+              /* 로딩 오버레이 */
+              #loadingOverlay {
+                  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                  background: rgba(255, 255, 255, 0.8); z-index: 9999;
+                  display: none; justify-content: center; align-items: center;
+                  font-size: 22px; font-weight: bold; color: #333;
+              }
+
+              .colorchange, .colorchange_1, .colorchange_2 { width: 14px; height: 14px; border-radius: 50%; border: none; background-color: #e5e5e5; margin-right: 6px; }
+
+              /* ===================================================== */
+              /* 모달창 디자인 (회원가입, 알림 공용) */
+              /* ===================================================== */
+              .modal-overlay {
+                  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                  background: rgba(0, 0, 0, 0.5); z-index: 1000;
+                  display: flex; justify-content: center; align-items: center;
+                  visibility: hidden; opacity: 0;
+                  transition: opacity 0.3s ease, visibility 0.3s ease;
+              }
+              .modal-overlay.show { visibility: visible; opacity: 1; }
+
+              .modal-content {
+                  background: #fff; padding: 35px 30px; border-radius: 16px; width: 380px;
+                  box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 15px;
+                  transform: translateY(-20px) scale(0.95);
+                  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+              }
+              .modal-overlay.show .modal-content { transform: translateY(0) scale(1); }
+
+              .modal-content h2 { font-size: 24px; color: #222; text-align: center; }
+              .modal-content p { font-size: 15px; color: #777; text-align: center; margin-bottom: 5px; line-height: 1.5; }
+
+              /* 회원가입 전용 인풋 */
+              .modal-content input {
+                  width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;
+                  background-color: #F5F5F5; outline: none;
+              }
+              .modal-content input:focus { border-color: #333; }
+
+              .modal-btns { display: flex; gap: 10px; margin-top: 10px; }
+              .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+              .modal-btn.cancel { background-color: #f1f1f1; color: #333; }
+              .modal-btn.cancel:hover { background-color: #ddd; }
+              .modal-btn.submit { background-color: #333; color: #fff; }
+              .modal-btn.submit:hover { background-color: #111; }
+
+              @media (max-width: 768px) {
+                  .container { flex-direction: column; }
+                  .sidebar { width: 100%; max-height: 300px; }
+                  .input-row { flex-direction: column; gap: 10px; }
+                  .category-select { width: 100%; }
+              }
+    </style>
+</head>
 <body>
     <div id="loadingOverlay">
-        <div>불러오는 중</div>
+        <div>불러오는 중...</div>
+    </div>
+
+    <div id="signUpModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>회원가입</h2>
+            <p>가입 후 관리자의 승인이 필요합니다.</p>
+            <input type="text" id="regStudentId" placeholder="학번 (예: 20301)" />
+            <input type="password" id="regPassword" placeholder="비밀번호 (6자리 이상)" />
+            <input type="password" id="regPasswordConfirm" placeholder="비밀번호 재확인" />
+            <div class="modal-btns">
+                <button class="modal-btn cancel" onclick="closeSignUpModal()">취소</button>
+                <button class="modal-btn submit" onclick="submitSignUp()">가입 신청</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal-content" style="align-items: center;">
+            <h2 id="alertTitle" style="margin-bottom: 5px;">알림</h2>
+            <p id="alertMessage" style="font-size: 16px; margin-bottom: 15px; color: #444;"></p>
+            <button class="modal-btn submit" style="width: 100%;" onclick="closeAlertModal()">확인</button>
+        </div>
     </div>
 
     <div class="container">
         <div class="sidebar" id="sidebar">
             <div class="logo-section">
                 <a href="https://school.gyo6.net/kcjahs/main.do?sysId=kcjahs" style="text-decoration: none; color: #333;"><div class="logo"><img src="rogo1.png"></div>
-                <div class="school-name">김천중앙고등학교</a> 학생회<div>중앙청원&nbsp<span style="font-size: 17px; background-color: #B3E5FC; font-weight: 500;"> BETA&nbsp</span></div></div>
+                <div class="school-name">김천중앙고등학교</a> 학생회<div>중앙청원&nbsp<span style="font-size: 18px; background-color: #B3E5FC; font-weight: 500;"> BETA&nbsp</span></div></div>
             </div>
 
             <input type="text" class="search-box" placeholder="건의사항 검색..." onkeyup="searchSuggestions(this.value)" />
@@ -26,13 +192,13 @@
                 <input type="text" id="studentId" placeholder="학번" style="background-color: #F5F5F5;"/>
                 <input type="password" id="password" placeholder="비밀번호" style="background-color: #F5F5F5;"/>
                 <button class="login-btn" onclick="handleLogin()">로그인</button>
-                <!--<button class="login-btn" onclick="handleSignUp()" style="margin-top: 10px; background-color: #fff; border: 1px solid #ccc;">회원가입</button>-->
+                <button class="login-btn signup-btn-trigger" onclick="openSignUpModal()">회원가입</button>
               </div>
             </div>
 
             <div class="user-info" id="userInfo">
                 <div class="user-name" id="userName">홍길동</div>
-                <div class="user-class" id="userClass">2학년 3반</div>
+                <div class="user-class" id="userClass">접속 중</div>
                 <button class="login-btn" onclick="handleLogout()" style="margin-top: 10px;">로그아웃</button>
             </div>
 
@@ -84,6 +250,309 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="app.js"></script>
+
+    <script>
+        const firebaseConfig = {
+                  apiKey: "AIzaSyAoGGM7daU7iXqn1N4dKK1zpyUnOTsy6i0",
+                  authDomain: "kcjahs-suggection.firebaseapp.com",
+                  projectId: "kcjahs-suggection",
+                  storageBucket: "kcjahs-suggection.firebasestorage.app",
+                  messagingSenderId: "680058871961",
+                  appId: "1:680058871961:web:6931fb143e6d1ce2a8d808",
+                  measurementId: "G-M84BJH4Z8P"
+              };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // 방어막 플래그: 회원가입 도중 불필요하게 로그인이 감지되는 걸 막음
+        window.isSigningUp = false;
+
+        // 로딩 화면 토글
+        function toggleLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = show ? 'flex' : 'none';
+        }
+
+        // === 커스텀 알림 모달 함수 ===
+        function showAlertModal(title, msg) {
+            document.getElementById('alertTitle').innerHTML = title;
+            document.getElementById('alertMessage').innerHTML = msg;
+            document.getElementById('alertModal').classList.add('show');
+        }
+        function closeAlertModal() {
+            document.getElementById('alertModal').classList.remove('show');
+        }
+
+        // === 회원가입 모달 컨트롤 ===
+        function openSignUpModal() {
+            document.getElementById('signUpModal').classList.add('show');
+        }
+        function closeSignUpModal() {
+            document.getElementById('signUpModal').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('regStudentId').value = '';
+                document.getElementById('regPassword').value = '';
+                document.getElementById('regPasswordConfirm').value = '';
+            }, 300);
+        }
+
+        window.onload = function() {
+            document.querySelector('.title-input').value = '';
+            document.querySelector('.content-textarea').value = '';
+            document.querySelector('.category-select').value = '';
+            document.getElementById('anonymous').checked = false;
+
+            auth.onAuthStateChanged(async (user) => {
+                // 회원가입 중이라면 무시
+                if (window.isSigningUp && user) return;
+
+                if (user) {
+                    toggleLoading(true);
+                    try {
+                        const userDoc = await db.collection('users').doc(user.uid).get();
+
+                        // 대기 상태(pending)면 커스텀 모달 띄우고 즉시 로그아웃 (무한 로딩 차단)
+                        if (userDoc.exists && userDoc.data().status === 'pending') {
+                            await auth.signOut();
+                            showAlertModal("가입 승인 대기 중", "학생회에서 계정을 확인하고 있습니다.<br>승인이 완료된 후 이용하실 수 있습니다.");
+                            toggleLoading(false);
+                            return;
+                        }
+
+                        // 승인(active)되었거나 기존에 만든 예전 아이디인 경우 통과!
+                        console.log("로그인 됨");
+                        document.getElementById('loginSection').style.display = 'none';
+                        document.getElementById('userInfo').classList.add('active');
+                        document.getElementById('userName').textContent = user.email.split('@')[0] + " 님";
+                        document.getElementById('userClass').textContent = '승인 완료된 계정';
+                        renderSuggestionLists();
+                    } catch(e) {
+                        console.error(e);
+                        // 권한 오류로 가져오지 못했을 때 무한 로딩 방지
+                        await auth.signOut();
+                        showAlertModal("오류 발생", "데이터베이스 권한 설정에 문제가 있습니다.<br>관리자에게 문의하세요.");
+                    } finally {
+                        toggleLoading(false); // 어떤 경우든 반드시 로딩을 끈다.
+                    }
+                } else {
+                    console.log("로그아웃 됨");
+                    document.getElementById('loginSection').style.display = 'block';
+                    document.getElementById('userInfo').classList.remove('active');
+                }
+            });
+        };
+
+        async function submitSignUp() {
+            const id = document.getElementById('regStudentId').value;
+            const pw = document.getElementById('regPassword').value;
+            const pwConfirm = document.getElementById('regPasswordConfirm').value;
+
+            if (!id || !pw || !pwConfirm) return showAlertModal("입력 오류", "모든 항목을 입력해주세요.");
+            if (pw !== pwConfirm) return showAlertModal("입력 오류", "비밀번호가 일치하지 않습니다.");
+            if (pw.length < 6) return showAlertModal("보안 약함", "비밀번호는 6자리 이상이어야 합니다.");
+
+            window.isSigningUp = true; // 방어막 켜기
+            toggleLoading(true);
+            try {
+                // 1. 파이어베이스 인증 가입 (자동 로그인 됨)
+                const userCredential = await auth.createUserWithEmailAndPassword(id + '@kimcheon.hs', pw);
+
+                // 2. 파이어베이스 데이터베이스에 'pending' 상태 저장
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    studentId: id,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 3. 로그아웃 후 마무리
+                await auth.signOut();
+                showAlertModal("가입 신청 완료", "회원가입이 정상적으로 신청되었습니다.<br>관리자의 승인 후 로그인할 수 있습니다.");
+                closeSignUpModal();
+            } catch (e) {
+                let msg = "가입 실패: ";
+                if(e.code === 'auth/email-already-in-use') msg += "이미 가입된 학번입니다.";
+                else msg += e.message;
+                showAlertModal("오류 발생", msg);
+            } finally {
+                window.isSigningUp = false; // 방어막 끄기
+                toggleLoading(false);
+            }
+        }
+
+        async function handleLogin() {
+            const id = document.getElementById('studentId').value;
+            const pw = document.getElementById('password').value;
+            if (!id || !pw) return showAlertModal("안내", "학번과 비밀번호를 입력해주세요.");
+
+            const blockKey = 'block_' + id;
+            const failKey = 'fails_' + id;
+
+            const blockUntil = localStorage.getItem(blockKey);
+            if (blockUntil && Date.now() < parseInt(blockUntil)) {
+                const remainMinutes = Math.ceil((parseInt(blockUntil) - Date.now()) / 60000);
+                return showAlertModal("로그인 차단됨", `5회 이상 로그인에 실패하였습니다.<br>${remainMinutes}분 후 다시 시도해주세요.`);
+            }
+
+            toggleLoading(true);
+            try {
+                await auth.signInWithEmailAndPassword(id + '@kimcheon.hs', pw);
+                localStorage.removeItem(failKey);
+                localStorage.removeItem(blockKey);
+                // 로그인 성공 시 onAuthStateChanged 가 로딩을 꺼줍니다.
+            } catch (e) {
+                let fails = parseInt(localStorage.getItem(failKey) || '0') + 1;
+                localStorage.setItem(failKey, fails);
+
+                if (fails >= 5) {
+                    const unblockTime = Date.now() + (10 * 60 * 1000);
+                    localStorage.setItem(blockKey, unblockTime);
+                    showAlertModal("보안 경고", "비밀번호를 5회 이상 틀렸습니다.<br>보안을 위해 10분간 로그인이 제한됩니다.");
+                } else {
+                    let msg = "로그인 실패";
+                    if(e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
+                        msg = "학번이나 비밀번호가 잘못되었습니다.";
+                    }
+                    showAlertModal("로그인 실패", `${msg} <br>(실패 횟수: ${fails}/5)`);
+                }
+                toggleLoading(false); // 실패시에만 여기서 로딩을 끕니다.
+            }
+        }
+
+        function handleLogout() {
+            auth.signOut();
+            document.querySelector('.pending-list').innerHTML = '';
+            document.querySelector('.completed-list').innerHTML = '';
+        }
+
+        async function submitSuggestion() {
+            const user = auth.currentUser;
+            if (!user) return showAlertModal("권한 없음", "로그인 후 이용해 주세요.");
+
+            const title = document.querySelector('.title-input').value.trim();
+            const content = document.querySelector('.content-textarea').value.trim();
+            const category = document.querySelector('.category-select').value;
+            const anon = document.getElementById('anonymous').checked;
+
+            if (!category || !title || !content) return showAlertModal("입력 누락", "카테고리, 제목, 내용을 모두 입력해주세요.");
+
+            toggleLoading(true);
+            try {
+                await db.collection('suggestions').add({
+                    uid: user.uid,
+                    authorId: anon ? '익명' : user.email.split('@')[0],
+                    title, content, category,
+                    date: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'pending',
+                    anonymous: anon
+                });
+
+                document.querySelector('.title-input').value = '';
+                document.querySelector('.content-textarea').value = '';
+                document.querySelector('.category-select').value = '';
+                document.getElementById('anonymous').checked = false;
+                showAlertModal("건의 완료", "소중한 의견이 등록되었습니다.");
+            } catch (e) {
+                showAlertModal("오류 발생", "제출 실패: " + e.message);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        function renderSuggestionLists() {
+            const pendingEl = document.querySelector('.pending-list');
+            const completedEl = document.querySelector('.completed-list');
+
+            toggleLoading(true);
+
+            db.collection('suggestions')
+                .orderBy('date', 'desc')
+                .onSnapshot(snapshot => {
+                    pendingEl.innerHTML = '';
+                    completedEl.innerHTML = '';
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const dateObj = data.date ? data.date.toDate() : new Date();
+                        const dateStr = dateObj.toISOString().split('T')[0];
+                        const docId = doc.id;
+
+                        const el = document.createElement('div');
+                        el.className = 'suggestion-item';
+
+                        el.onclick = function() {
+                            showAlertModal(`[${data.category}] ${data.title}`, `<div style='text-align:left; white-space:pre-wrap;'>${data.content}</div>`);
+                        };
+
+                        let actionButtons = '';
+                        if (auth.currentUser && data.uid === auth.currentUser.uid) {
+                            actionButtons = `
+                                <div class="item-actions">
+                                    <button class="action-btn btn-edit" onclick="event.stopPropagation(); editSuggestion('${docId}')">수정</button>
+                                    <button class="action-btn btn-delete" onclick="event.stopPropagation(); deleteSuggestion('${docId}')">삭제</button>
+                                </div>
+                            `;
+                        }
+
+                        el.innerHTML = `
+                            <div class="suggestion-title">[${data.category}] ${data.title}</div>
+                            <div class="suggestion-date">
+                                <span class="status-badge ${data.status === 'completed' ? 'status-completed' : 'status-pending'}">
+                                    ${data.status === 'completed' ? '완료' : '검토중'}
+                                </span>
+                                ${dateStr} | ${data.anonymous ? '익명' : (data.authorId || '학생')}
+                            </div>
+                            ${actionButtons}
+                        `;
+
+                        if (data.status === 'completed') completedEl.appendChild(el);
+                        else pendingEl.appendChild(el);
+                    });
+                    toggleLoading(false);
+                }, (error) => {
+                    console.error("Error:", error);
+                    toggleLoading(false);
+                });
+        }
+
+        function searchSuggestions(keyword) {
+            const items = document.querySelectorAll('.suggestion-item');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(keyword.toLowerCase()) ? 'block' : 'none';
+            });
+        }
+
+        async function deleteSuggestion(docId) {
+            if(!confirm("정말 삭제하시겠습니까?")) return;
+            try {
+                await db.collection('suggestions').doc(docId).delete();
+                showAlertModal("삭제 완료", "정상적으로 삭제되었습니다.");
+            } catch(e) {
+                showAlertModal("오류", "삭제 실패: " + e.message);
+            }
+        }
+
+        async function editSuggestion(docId) {
+            const newTitle = prompt("수정할 제목을 입력하세요:");
+            if(newTitle === null) return;
+
+            const newContent = prompt("수정할 내용을 입력하세요:");
+            if(newContent === null) return;
+
+            if(!newTitle || !newContent) return showAlertModal("입력 누락", "내용을 입력해주세요.");
+
+            try {
+                await db.collection('suggestions').doc(docId).update({
+                    title: newTitle,
+                    content: newContent
+                });
+                showAlertModal("수정 완료", "정상적으로 수정되었습니다.");
+            } catch(e) {
+                showAlertModal("오류", "수정 실패: " + e.message);
+            }
+        }
+    </script>
 </body>
 </html>
