@@ -76,6 +76,37 @@
               .main-content { flex: 1; display: flex; flex-direction: column; padding: 50px 40px; background-color: #ffffff; align-items: center; }
               .main-wrapper { max-width: 800px; width: 100%; display: flex; flex-direction: column; }
 
+              /* === 📢 공지사항 배너 스타일 추가 === */
+              .announcement-banner {
+                  width: 100%;
+                  background-color: #f8faff;
+                  border: 1px solid #d1e3ff;
+                  border-radius: 12px;
+                  padding: 14px 20px;
+                  margin-bottom: 25px; /* 배너와 헤더 사이 간격 */
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+              }
+              .announcement-badge {
+                  background-color: #432DD7; /* 강조 포인트 컬러 */
+                  color: #fff;
+                  padding: 4px 10px;
+                  border-radius: 8px;
+                  font-size: 13px;
+                  font-weight: bold;
+                  flex-shrink: 0;
+              }
+              .announcement-text {
+                  font-size: 16px;
+                  color: #333;
+                  font-weight: 500;
+                  white-space: nowrap; /* 한 줄로 표시 */
+                  overflow: hidden;    /* 넘치는 부분 숨김 */
+                  text-overflow: ellipsis; /* 말줄임표 처리 */
+              }
+
               .header { text-align: left; margin-bottom: 40px; }
               .header-controls { display: flex; gap: 6px; margin-bottom: 15px; }
               .page-title { font-size: 28px; font-weight: 600; color: #1a1a1a; line-height: 1.4; }
@@ -212,6 +243,12 @@
 
         <div class="main-content">
             <div class="main-wrapper">
+
+                <div class="announcement-banner" id="announcementBanner" style="display: none;">
+                    <span class="announcement-badge">공지</span>
+                    <span class="announcement-text" id="announcementText"></span>
+                </div>
+
                 <div class="header">
                     <div class="header-controls">
                         <button class="colorchange"></button><button class="colorchange_1"></button><button class="colorchange_2"></button>
@@ -294,11 +331,35 @@
             }, 300);
         }
 
+        // 📢 공지사항 불러오기 함수
+        function loadAnnouncement() {
+            db.collection('announcements')
+              .orderBy('date', 'desc')
+              .limit(1) // 가장 최근 1개만 가져옴
+              .onSnapshot(snapshot => {
+                  const banner = document.getElementById('announcementBanner');
+                  const textEl = document.getElementById('announcementText');
+
+                  if (!snapshot.empty) {
+                      const data = snapshot.docs[0].data();
+                      textEl.textContent = data.content; // 공지 내용
+                      banner.style.display = 'flex'; // 공지가 있으면 보이기
+                  } else {
+                      banner.style.display = 'none'; // 없으면 숨기기
+                  }
+              }, error => {
+                  console.error("공지사항 로드 오류:", error);
+              });
+        }
+
         window.onload = function() {
             document.querySelector('.title-input').value = '';
             document.querySelector('.content-textarea').value = '';
             document.querySelector('.category-select').value = '';
             document.getElementById('anonymous').checked = false;
+
+            // 페이지 로딩 시 공지사항 불러오기 실행
+            loadAnnouncement();
 
             auth.onAuthStateChanged(async (user) => {
                 if (window.isSigningUp && user) return;
@@ -316,13 +377,13 @@
                                 showAlertModal("가입 승인 대기 중", "학생회에서 계정을 확인하고 있습니다.<br>승인이 완료된 후 이용하실 수 있습니다.");
                                 toggleLoading(false);
                                 return;
-                            } 
+                            }
                             else if (status === 'rejected') {
                                 await auth.signOut();
                                 showAlertModal("접속 차단됨", "가입이 거절되었거나 영구 탈퇴 처리된 계정입니다.");
                                 toggleLoading(false);
                                 return;
-                            } 
+                            }
                             else if (status === 'suspended') {
                                 await auth.signOut();
                                 showAlertModal("이용 정지 안내", "운영원칙 위반 등의 사유로 계정 이용이 정지되었습니다.<br>이의 제기는 학생회로 문의해주세요.");
@@ -330,7 +391,7 @@
                                 return;
                             }
                         }
-                        
+
                         console.log("로그인 성공");
                         document.getElementById('loginSection').style.display = 'none';
                         document.getElementById('userInfo').classList.add('active');
@@ -346,7 +407,7 @@
                         document.getElementById('userClass').textContent = '학생 계정';
                         renderSuggestionLists();
                     } finally {
-                        toggleLoading(false); 
+                        toggleLoading(false);
                     }
                 } else {
                     console.log("로그아웃 상태");
@@ -365,7 +426,7 @@
             if (pw !== pwConfirm) return showAlertModal("입력 오류", "비밀번호가 일치하지 않습니다.");
             if (pw.length < 6) return showAlertModal("보안 약함", "비밀번호는 6자리 이상이어야 합니다.");
 
-            window.isSigningUp = true; 
+            window.isSigningUp = true;
             toggleLoading(true);
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(id + '@kimcheon.hs', pw);
@@ -385,7 +446,7 @@
                 else msg += e.message;
                 showAlertModal("오류 발생", msg);
             } finally {
-                window.isSigningUp = false; 
+                window.isSigningUp = false;
                 toggleLoading(false);
             }
         }
@@ -424,7 +485,7 @@
                     }
                     showAlertModal("로그인 실패", `${msg} <br>(실패 횟수: ${fails}/5)`);
                 }
-                toggleLoading(false); 
+                toggleLoading(false);
             }
         }
 
@@ -438,7 +499,6 @@
             const user = auth.currentUser;
             if (!user) return showAlertModal("권한 없음", "로그인 후 이용해 주세요.");
 
-            // 🔥 [추가됨] 2. 5분 도배 방지 기능 추가
             const lastTime = localStorage.getItem('lastSubmitTime_' + user.uid);
             if (lastTime && Date.now() - parseInt(lastTime) < 5 * 60 * 1000) {
                 const remainSec = Math.ceil((5 * 60 * 1000 - (Date.now() - parseInt(lastTime))) / 1000);
@@ -458,15 +518,13 @@
             try {
                 await db.collection('suggestions').add({
                     uid: user.uid,
-                    // 🔥 [추가됨] 1. 무조건 작성자의 실제 학번을 authorId로 저장 (익명 체크 상관없음)
-                    authorId: user.email.split('@')[0], 
+                    authorId: user.email.split('@')[0],
                     title, content, category,
                     date: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'pending',
-                    anonymous: anon // 프론트엔드용 익명 스위치
+                    anonymous: anon
                 });
 
-                // 성공적으로 업로드 후 로컬 스토리지에 현재 시간 저장
                 localStorage.setItem('lastSubmitTime_' + user.uid, Date.now());
 
                 document.querySelector('.title-input').value = '';
@@ -507,7 +565,6 @@
                         };
 
                         let actionButtons = '';
-                        // 🔥 [추가됨] 3. 본인 글이면서 답변 상태가 completed(완료)가 아닐 때만 수정/삭제 버튼 노출
                         if (auth.currentUser && data.uid === auth.currentUser.uid && data.status !== 'completed') {
                             actionButtons = `
                                 <div class="item-actions">
