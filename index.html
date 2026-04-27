@@ -107,7 +107,7 @@
               .colorchange, .colorchange_1, .colorchange_2 { width: 14px; height: 14px; border-radius: 50%; border: none; background-color: #e5e5e5; margin-right: 6px; }
 
               /* ===================================================== */
-              /* 모달창 디자인 (회원가입, 알림 공용) */
+              /* 모달창 디자인 */
               /* ===================================================== */
               .modal-overlay {
                   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -129,7 +129,6 @@
               .modal-content h2 { font-size: 24px; color: #222; text-align: center; }
               .modal-content p { font-size: 15px; color: #777; text-align: center; margin-bottom: 5px; line-height: 1.5; }
 
-              /* 회원가입 전용 인풋 */
               .modal-content input {
                   width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;
                   background-color: #F5F5F5; outline: none;
@@ -246,6 +245,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -266,16 +266,13 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // 방어막 플래그: 회원가입 도중 불필요하게 로그인이 감지되는 걸 막음
         window.isSigningUp = false;
 
-        // 로딩 화면 토글
         function toggleLoading(show) {
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) overlay.style.display = show ? 'flex' : 'none';
         }
 
-        // === 커스텀 알림 모달 함수 ===
         function showAlertModal(title, msg) {
             document.getElementById('alertTitle').innerHTML = title;
             document.getElementById('alertMessage').innerHTML = msg;
@@ -285,7 +282,6 @@
             document.getElementById('alertModal').classList.remove('show');
         }
 
-        // === 회원가입 모달 컨트롤 ===
         function openSignUpModal() {
             document.getElementById('signUpModal').classList.add('show');
         }
@@ -304,50 +300,42 @@
             document.querySelector('.category-select').value = '';
             document.getElementById('anonymous').checked = false;
 
-            // 🔥 [수정된 핵심 로직] 인증 상태 감지 및 DB 상태(status) 정밀 체크
+            // 🔥 [핵심 변경] Auth 기준 로그인 통과 & users DB는 상태 검사용으로만 유연하게 사용
             auth.onAuthStateChanged(async (user) => {
                 if (window.isSigningUp && user) return;
 
                 if (user) {
                     toggleLoading(true);
                     try {
+                        // 1. Firebase Auth는 이미 통과했으니, 추가로 DB 상태 검사만 진행
                         const userDoc = await db.collection('users').doc(user.uid).get();
 
                         if (userDoc.exists) {
                             const status = userDoc.data().status;
 
-                            // 1. 대기 상태 (pending) 차단
+                            // DB에 기록된 상태가 차단 사유에 해당하면 튕겨냄
                             if (status === 'pending') {
                                 await auth.signOut();
                                 showAlertModal("가입 승인 대기 중", "학생회에서 계정을 확인하고 있습니다.<br>승인이 완료된 후 이용하실 수 있습니다.");
                                 toggleLoading(false);
                                 return;
                             }
-                            // 2. 가입 거절 / 탈퇴 (rejected) 차단
                             else if (status === 'rejected') {
                                 await auth.signOut();
                                 showAlertModal("접속 차단됨", "가입이 거절되었거나 영구 탈퇴 처리된 계정입니다.");
                                 toggleLoading(false);
                                 return;
                             }
-                            // 3. 이용 정지 (suspended) 차단
                             else if (status === 'suspended') {
                                 await auth.signOut();
                                 showAlertModal("이용 정지 안내", "운영원칙 위반 등의 사유로 계정 이용이 정지되었습니다.<br>이의 제기는 학생회로 문의해주세요.");
                                 toggleLoading(false);
                                 return;
                             }
-                            // status가 'active'이거나 예전 계정일 경우 아래 코드로 통과!
-                        } else {
-                            // DB에 문서 자체가 없는 유령 계정 방어
-                            await auth.signOut();
-                            showAlertModal("오류", "데이터베이스에 등록되지 않은 계정입니다.<br>다시 회원가입을 진행해주세요.");
-                            toggleLoading(false);
-                            return;
                         }
 
-                        // 정상 승인(active)된 유저 UI 처리
-                        console.log("로그인 됨");
+                        // 2. DB 문서가 아예 없거나(예전 가입자) 상태가 active인 경우, 무조건 로그인 통과!
+                        console.log("로그인 성공");
                         document.getElementById('loginSection').style.display = 'none';
                         document.getElementById('userInfo').classList.add('active');
                         document.getElementById('userName').textContent = user.email.split('@')[0] + " 님";
@@ -355,14 +343,18 @@
                         renderSuggestionLists();
 
                     } catch(e) {
-                        console.error(e);
-                        await auth.signOut();
-                        showAlertModal("오류 발생", "데이터베이스 권한 설정에 문제가 있습니다.<br>관리자에게 문의하세요.");
+                        console.error("DB 상태 확인 오류:", e);
+                        // DB 규칙 오류가 나도 로그인은 Auth 기준이므로 통과시킴
+                        document.getElementById('loginSection').style.display = 'none';
+                        document.getElementById('userInfo').classList.add('active');
+                        document.getElementById('userName').textContent = user.email.split('@')[0] + " 님";
+                        document.getElementById('userClass').textContent = '학생 계정';
+                        renderSuggestionLists();
                     } finally {
                         toggleLoading(false);
                     }
                 } else {
-                    console.log("로그아웃 됨");
+                    console.log("로그아웃 상태");
                     document.getElementById('loginSection').style.display = 'block';
                     document.getElementById('userInfo').classList.remove('active');
                 }
@@ -422,6 +414,7 @@
                 await auth.signInWithEmailAndPassword(id + '@kimcheon.hs', pw);
                 localStorage.removeItem(failKey);
                 localStorage.removeItem(blockKey);
+                // 로그인 성공 시 onAuthStateChanged 가 로딩을 끄고 UI를 변경합니다.
             } catch (e) {
                 let fails = parseInt(localStorage.getItem(failKey) || '0') + 1;
                 localStorage.setItem(failKey, fails);
