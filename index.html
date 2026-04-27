@@ -181,7 +181,7 @@
     <div class="container">
         <div class="sidebar" id="sidebar">
             <div class="logo-section">
-                <a href="https://school.gyo6.net/kcjahs/main.do?sysId=kcjahs" style="text-decoration: none; color: #333;"><div class="logo"><img src="rogo1.png"></div>
+                <a href="https://school.gyo6.net/kcjahs/main.do?sysId=kcjahs" style="text-decoration: none; color: #333;"><div class="logo"><img src="rogo1.png" alt="logo"></div>
                 <div class="school-name">김천중앙고등학교</a> 학생회<div>중앙청원&nbsp<span style="font-size: 18px; background-color: #B3E5FC; font-weight: 500;"> BETA&nbsp</span></div></div>
             </div>
 
@@ -304,8 +304,8 @@
             document.querySelector('.category-select').value = '';
             document.getElementById('anonymous').checked = false;
 
+            // 🔥 [수정된 핵심 로직] 인증 상태 감지 및 DB 상태(status) 정밀 체크
             auth.onAuthStateChanged(async (user) => {
-                // 회원가입 중이라면 무시
                 if (window.isSigningUp && user) return;
 
                 if (user) {
@@ -313,28 +313,53 @@
                     try {
                         const userDoc = await db.collection('users').doc(user.uid).get();
 
-                        // 대기 상태(pending)면 커스텀 모달 띄우고 즉시 로그아웃 (무한 로딩 차단)
-                        if (userDoc.exists && userDoc.data().status === 'pending') {
+                        if (userDoc.exists) {
+                            const status = userDoc.data().status;
+
+                            // 1. 대기 상태 (pending) 차단
+                            if (status === 'pending') {
+                                await auth.signOut();
+                                showAlertModal("가입 승인 대기 중", "학생회에서 계정을 확인하고 있습니다.<br>승인이 완료된 후 이용하실 수 있습니다.");
+                                toggleLoading(false);
+                                return;
+                            }
+                            // 2. 가입 거절 / 탈퇴 (rejected) 차단
+                            else if (status === 'rejected') {
+                                await auth.signOut();
+                                showAlertModal("접속 차단됨", "가입이 거절되었거나 영구 탈퇴 처리된 계정입니다.");
+                                toggleLoading(false);
+                                return;
+                            }
+                            // 3. 이용 정지 (suspended) 차단
+                            else if (status === 'suspended') {
+                                await auth.signOut();
+                                showAlertModal("이용 정지 안내", "운영원칙 위반 등의 사유로 계정 이용이 정지되었습니다.<br>이의 제기는 학생회로 문의해주세요.");
+                                toggleLoading(false);
+                                return;
+                            }
+                            // status가 'active'이거나 예전 계정일 경우 아래 코드로 통과!
+                        } else {
+                            // DB에 문서 자체가 없는 유령 계정 방어
                             await auth.signOut();
-                            showAlertModal("가입 승인 대기 중", "학생회에서 계정을 확인하고 있습니다.<br>승인이 완료된 후 이용하실 수 있습니다.");
+                            showAlertModal("오류", "데이터베이스에 등록되지 않은 계정입니다.<br>다시 회원가입을 진행해주세요.");
                             toggleLoading(false);
                             return;
                         }
 
-                        // 승인(active)되었거나 기존에 만든 예전 아이디인 경우 통과!
+                        // 정상 승인(active)된 유저 UI 처리
                         console.log("로그인 됨");
                         document.getElementById('loginSection').style.display = 'none';
                         document.getElementById('userInfo').classList.add('active');
                         document.getElementById('userName').textContent = user.email.split('@')[0] + " 님";
                         document.getElementById('userClass').textContent = '승인 완료된 계정';
                         renderSuggestionLists();
+
                     } catch(e) {
                         console.error(e);
-                        // 권한 오류로 가져오지 못했을 때 무한 로딩 방지
                         await auth.signOut();
                         showAlertModal("오류 발생", "데이터베이스 권한 설정에 문제가 있습니다.<br>관리자에게 문의하세요.");
                     } finally {
-                        toggleLoading(false); // 어떤 경우든 반드시 로딩을 끈다.
+                        toggleLoading(false);
                     }
                 } else {
                     console.log("로그아웃 됨");
@@ -353,20 +378,17 @@
             if (pw !== pwConfirm) return showAlertModal("입력 오류", "비밀번호가 일치하지 않습니다.");
             if (pw.length < 6) return showAlertModal("보안 약함", "비밀번호는 6자리 이상이어야 합니다.");
 
-            window.isSigningUp = true; // 방어막 켜기
+            window.isSigningUp = true;
             toggleLoading(true);
             try {
-                // 1. 파이어베이스 인증 가입 (자동 로그인 됨)
                 const userCredential = await auth.createUserWithEmailAndPassword(id + '@kimcheon.hs', pw);
 
-                // 2. 파이어베이스 데이터베이스에 'pending' 상태 저장
                 await db.collection('users').doc(userCredential.user.uid).set({
                     studentId: id,
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // 3. 로그아웃 후 마무리
                 await auth.signOut();
                 showAlertModal("가입 신청 완료", "회원가입이 정상적으로 신청되었습니다.<br>관리자의 승인 후 로그인할 수 있습니다.");
                 closeSignUpModal();
@@ -376,7 +398,7 @@
                 else msg += e.message;
                 showAlertModal("오류 발생", msg);
             } finally {
-                window.isSigningUp = false; // 방어막 끄기
+                window.isSigningUp = false;
                 toggleLoading(false);
             }
         }
@@ -400,7 +422,6 @@
                 await auth.signInWithEmailAndPassword(id + '@kimcheon.hs', pw);
                 localStorage.removeItem(failKey);
                 localStorage.removeItem(blockKey);
-                // 로그인 성공 시 onAuthStateChanged 가 로딩을 꺼줍니다.
             } catch (e) {
                 let fails = parseInt(localStorage.getItem(failKey) || '0') + 1;
                 localStorage.setItem(failKey, fails);
@@ -416,7 +437,7 @@
                     }
                     showAlertModal("로그인 실패", `${msg} <br>(실패 횟수: ${fails}/5)`);
                 }
-                toggleLoading(false); // 실패시에만 여기서 로딩을 끕니다.
+                toggleLoading(false);
             }
         }
 
