@@ -182,10 +182,11 @@
     </style>
 </head>
 <body>
-  <div id="maintenanceOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 999999; justify-content: center; align-items: center; flex-direction: column; text-align: center;">
+    <div id="maintenanceOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 999999; justify-content: center; align-items: center; flex-direction: column; text-align: center;">
         <h1 style="font-size: 32px; margin-bottom: 20px;">점검 중입니다</h1>
         <p style="font-size: 18px; color: #666; line-height: 1.5;">보다 안정적인 서비스를 위해 현재 시스템 점검을 진행하고 있습니다.<br>점검이 끝난 후 다시 접속해 주세요.</p>
     </div>
+
     <div id="loadingOverlay">
         <div>불러오는 중...</div>
     </div>
@@ -194,7 +195,8 @@
         <div class="modal-content">
             <h2>회원가입</h2>
             <p>가입 후 관리자의 승인이 필요합니다.</p>
-            <input type="text" id="regStudentId" placeholder="학번+이름 (형식 예시: 30901 홍길동)" />
+            <input type="text" id="regStudentId" placeholder="학번 (예: 30901)" />
+            <input type="text" id="regName" placeholder="이름 (예: 홍길동)" />
             <input type="password" id="regPassword" placeholder="비밀번호 (6자리 이상)" />
             <input type="password" id="regPasswordConfirm" placeholder="비밀번호 재확인" />
             <div class="modal-btns">
@@ -247,7 +249,6 @@
 
         <div class="main-content">
             <div class="main-wrapper">
-
                 <div class="announcement-banner" id="announcementBanner" style="display: none;">
                     <span class="announcement-badge">공지</span>
                     <span class="announcement-text" id="announcementText"></span>
@@ -286,6 +287,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -306,13 +308,12 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // 📢 점검 모드 실시간 감지 (이 코드가 작동해야 화면이 가려집니다)
         db.collection("settings").doc("system").onSnapshot((doc) => {
             const overlay = document.getElementById('maintenanceOverlay');
             if (doc.exists && doc.data().isMaintenanceMode === true) {
-                overlay.style.display = 'flex'; // 점검 모드면 가림막 표시
+                overlay.style.display = 'flex';
             } else {
-                overlay.style.display = 'none'; // 평소에는 숨김
+                overlay.style.display = 'none';
             }
         });
 
@@ -339,12 +340,12 @@
             document.getElementById('signUpModal').classList.remove('show');
             setTimeout(() => {
                 document.getElementById('regStudentId').value = '';
+                document.getElementById('regName').value = ''; // 추가됨
                 document.getElementById('regPassword').value = '';
                 document.getElementById('regPasswordConfirm').value = '';
             }, 300);
         }
 
-        // 📢 공지사항 불러오기
         function loadAnnouncement() {
             db.collection('announcements')
               .orderBy('date', 'desc')
@@ -407,7 +408,8 @@
                         console.log("로그인 성공");
                         document.getElementById('loginSection').style.display = 'none';
                         document.getElementById('userInfo').classList.add('active');
-                        document.getElementById('userName').textContent = user.email.split('@')[0] + " 님";
+                        // 가입 시 저장해둔 "학번 이름"이 displayName에 있으면 불러오고, 예전 아이디면 이메일 앞부분 표시
+                        document.getElementById('userName').textContent = (user.displayName || user.email.split('@')[0]) + " 님";
                         document.getElementById('userClass').textContent = '승인 완료된 계정';
                         renderSuggestionLists();
 
@@ -415,7 +417,7 @@
                         console.error("DB 상태 확인 오류:", e);
                         document.getElementById('loginSection').style.display = 'none';
                         document.getElementById('userInfo').classList.add('active');
-                        document.getElementById('userName').textContent = user.email.split('@')[0] + " 님";
+                        document.getElementById('userName').textContent = (user.displayName || user.email.split('@')[0]) + " 님";
                         document.getElementById('userClass').textContent = '학생 계정';
                         renderSuggestionLists();
                     } finally {
@@ -430,11 +432,12 @@
         };
 
         async function submitSignUp() {
-            const id = document.getElementById('regStudentId').value;
+            const id = document.getElementById('regStudentId').value.trim();
+            const name = document.getElementById('regName').value.trim();
             const pw = document.getElementById('regPassword').value;
             const pwConfirm = document.getElementById('regPasswordConfirm').value;
 
-            if (!id || !pw || !pwConfirm) return showAlertModal("입력 오류", "모든 항목을 입력해주세요.");
+            if (!id || !name || !pw || !pwConfirm) return showAlertModal("입력 오류", "모든 항목을 입력해주세요.");
             if (pw !== pwConfirm) return showAlertModal("입력 오류", "비밀번호가 일치하지 않습니다.");
             if (pw.length < 6) return showAlertModal("보안 약함", "비밀번호는 6자리 이상이어야 합니다.");
 
@@ -443,8 +446,15 @@
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(id + '@kimcheon.hs', pw);
 
+                // 파이어베이스 Auth 내장 프로필에 "학번 이름" 저장
+                await userCredential.user.updateProfile({
+                    displayName: `${id} ${name}`
+                });
+
+                // DB에도 저장
                 await db.collection('users').doc(userCredential.user.uid).set({
                     studentId: id,
+                    name: name,
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -530,7 +540,8 @@
             try {
                 await db.collection('suggestions').add({
                     uid: user.uid,
-                    authorId: user.email.split('@')[0],
+                    // DB에는 무조건 작성자 정보(학번 이름) 기록
+                    authorId: user.displayName || user.email.split('@')[0],
                     title, content, category,
                     date: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'pending',
@@ -559,6 +570,7 @@
 
             db.collection('suggestions')
                 .orderBy('date', 'desc')
+                .limit(20) // 💡 데이터베이스 읽기 최적화 (20개 제한)
                 .onSnapshot(snapshot => {
                     pendingEl.innerHTML = '';
                     completedEl.innerHTML = '';
@@ -566,7 +578,6 @@
                     snapshot.forEach(doc => {
                         const data = doc.data();
 
-                        // 날짜 표기 버그 수정 완료 (한국 시간 기준)
                         const dateObj = data.date ? data.date.toDate() : new Date();
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -583,6 +594,7 @@
                         };
 
                         let actionButtons = '';
+                        // 💡 작성자 본인이면서 상태가 '완료(completed)'가 아닐 때만 수정/삭제 버튼 노출
                         if (auth.currentUser && data.uid === auth.currentUser.uid && data.status !== 'completed') {
                             actionButtons = `
                                 <div class="item-actions">
